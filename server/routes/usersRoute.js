@@ -2,12 +2,12 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer');
 const path = require('path');
-// const User = require('../model/userModel');
+const db = require('../db')
 
 const storage = multer.diskStorage({
   destination: function(req, file, callback) {
     // output dir
-    callback(null, './server/imageChunk');
+    callback(null, './client/src/assets');
   },
   filename: function(req, file, callback) { 
     callback(null, Date.now() + path.extname(file.originalname));
@@ -15,12 +15,12 @@ const storage = multer.diskStorage({
 });
 
 // check req file is image
-const fileFilter = (req, file, cb) => {
+const fileFilter = (req, file, callback) => {
   const allowedFileTypes = ['image/jpeg', 'image/jpg', 'image/png'];
   if(allowedFileTypes.includes(file.mimetype)) {
-    cb(null, true);
+    callback(null, true);
   } else {
-    cb(null, false);
+    callback(null, false);
   }
 }
 
@@ -37,7 +37,7 @@ router.get('/', (req, res) => {
 
 // @route /users/add
 // @post photo
-router.post('/upload', upload.array('upload', 4), async (req,res) => {
+router.post('/upload', upload.array('upload-img-pass', 4), async (req,res) => {
   // save data to mongodb
   res.status(200).json({
     success: 'Array success'
