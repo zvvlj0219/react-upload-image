@@ -2,15 +2,34 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer');
 const path = require('path');
-const db = require('../db')
+const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: function(req, file, callback) {
     // output dir
     callback(null, './client/src/assets');
   },
-  filename: function(req, file, callback) { 
-    callback(null, Date.now() + path.extname(file.originalname));
+  filename: function(req, file, callback) {
+    const filename = Date.now() + path.extname(file.originalname)
+    callback(null, filename);
+
+    // const data = {
+    //   created_at: String(Date.now()),
+    //   filename: String(filename)
+    // }
+
+    // const jsonObject = JSON.parse(fs.readFileSync('server/db.json', 'utf8'))
+
+    // jsonObject.data.push(data)
+
+    // fs.writeFile(
+    //   'server/db.json',
+    //   JSON.stringify(jsonObject, null, '\t'),
+    //   err => {
+    //   if (err) throw err
+    //   console.log('added data')
+    // })
+
   }
 });
 
@@ -42,6 +61,7 @@ router.post('/upload', upload.array('upload-img-pass', 4), async (req,res) => {
   res.status(200).json({
     success: 'Array success'
   })
+  // res.status(200)
 })
 
 module.exports = router;

@@ -1,9 +1,29 @@
 import { useState, useCallback, useEffect } from "react";
 import axios from 'axios'
 
+// db
+const pastPost = [
+  '1645176118514.jpg',
+  '1645176087747.jpg',
+  '1645176034565.jpg'
+]
+
 const App = () => {
   const [image, setImage] = useState({})
   const [previewSrc, setPreviewSrc] = useState([])
+  const [post, setPost] =useState([])
+
+  const fetchUserPost = useCallback(async () => {
+    for (let i = 0; i < pastPost.length; i += 1) {
+      const res = await import(`./assets/${pastPost[i]}`)
+      setPost(post => {
+        return [
+          ...post,
+          res.default
+        ]
+      })
+    }
+  }, [post, setPost])
   
   const previewer = useCallback(file => {
     if (!file) return
@@ -59,11 +79,17 @@ const App = () => {
     )
     .then(res => {
       console.log(res);
+      setPreviewSrc([])
+      console.log('successfully uploaded')
     })
     .catch(err => {
       console.log(err);
     });
   }, [image])
+
+  useEffect(() => {
+    fetchUserPost()
+  }, [])
   
   return (
     <div className='App'>
@@ -89,7 +115,7 @@ const App = () => {
           />
         </label>
           {
-            previewSrc.length > 0 ? (
+            previewSrc.length > 0 && (
               <div className='preview_image'>
                 <p>preview</p>
                 {
@@ -128,11 +154,32 @@ const App = () => {
                   }}
                 />
               </div>
-            ) : (
-              <p>no selected images</p>
             )
           }
       </form>
+      <div className='user_post'>
+        <p>user posts</p>
+        {
+          post.length > 0 ? (
+           post.map(src => (
+            <div>
+              <img
+                src={src}
+                alt=''
+                style={{
+                  display: 'block',
+                  marginTop: '15px',
+                  width: '300px',
+                  height: '200px'
+                }}
+              />
+            </div>
+           ))
+          ) : (
+            <p>Loading ...</p>
+          )
+        }
+      </div>
     </div>
   );
 }
