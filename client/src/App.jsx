@@ -1,29 +1,51 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import axios from 'axios'
 
 const App = () => {
   const [image, setImage] = useState({})
+  const [previewSrc, setPreviewSrc] = useState([])
   
+  const previewer = useCallback(file => {
+    if (!file) return
+
+    const reader = new FileReader()
+
+    reader.readAsDataURL(file)
+
+    reader.onload = event => {
+      setPreviewSrc(previewSrc => {
+        return [
+          ...previewSrc,
+          event.target.result
+        ]
+      })
+    }
+  }, [previewSrc])
+
   const handleImage = useCallback(e => {
     if (!e.target.files) return
-    setImage(e.target.files) 
-  }, [setImage])
-  // const handleImage = useCallback(e => {
-  //   if (!e.target.files[0]) return
-  //   setImage(e.target.files[0]) 
-  // }, [setImage])
+    setImage(e.target.files)
 
-  console.log(image)
+    for (let i = 0; i < e.target.files.length; i += 1) {
+      previewer(e.target.files[i])
+    }
+  }, [setImage])
+
+  const removeImage = useCallback(src => {
+    const refreshedState = previewSrc.filter(el => {
+      return el !== src
+    })
+    setPreviewSrc(refreshedState)
+  }, [previewSrc, setPreviewSrc])
+
 
   const uploadImageFile = useCallback(async e => {
     e.preventDefault();
 
     const formData = new FormData();
-
-    // formData.append('upload', image);
     
     for (let i = 0; i < image.length; i++) {
-      formData.append('upload', image[i]);
+      formData.append('upload-img-pass', image[i]);
     }
 
     await axios.post(
@@ -45,17 +67,19 @@ const App = () => {
   
   return (
     <div className='App'>
-      <h1>react upload image</h1>
+      <h1>React Upload Image</h1>
       <form
+        className='select_image'
         onSubmit={e => uploadImageFile(e)}
         encType='multipart/form-data'
       >
         <label htmlFor='upload-image-btn'>
           select image
+          <hr />
           <input
             type='file'
             accept='image/*'
-            name='upload'
+            name='upload-img-pass'
             id='upload-image-btn'
             multiple
             style={{
@@ -64,13 +88,51 @@ const App = () => {
             onChange={e => handleImage(e)}
           />
         </label>
-        <hr />
-        <input
-          type='submit'
-          value='upload'
-        />
+          {
+            previewSrc.length > 0 ? (
+              <div className='preview_image'>
+                <p>preview</p>
+                {
+                  previewSrc.map(src => (
+                    <div key={src}>
+                      <img
+                        src={src}
+                        alt=''
+                        style={{
+                          width: '300px',
+                          height: '200px'
+                        }}
+                      /> 
+                      <button
+                        type='button'
+                        onClick={() => removeImage(src)}
+                        style={{
+                          display: 'block',
+                          marginLeft: '20px'
+                        }}
+                      >
+                        delete
+                      </button>
+                      <div style={{margin: '20px'}} />
+                    </div>
+                  ))
+                }
+                <input
+                  type='submit'
+                  value='upload'
+                  style={{
+                    display: 'block',
+                    marginTop: '15px',
+                    width: '200px',
+                    height: '30px'
+                  }}
+                />
+              </div>
+            ) : (
+              <p>no selected images</p>
+            )
+          }
       </form>
-      <hr />
     </div>
   );
 }
