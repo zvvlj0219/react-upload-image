@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import axios from 'axios'
+import ImageSlider from "./Carousel";
 
 // db
 const pastPost = [
@@ -94,6 +95,8 @@ const App = () => {
   return (
     <div className='App'>
       <h1>React Upload Image</h1>
+      <ImageSlider imageData={pastPost} />
+      <hr />
       <form
         className='select_image'
         onSubmit={e => uploadImageFile(e)}
@@ -162,7 +165,7 @@ const App = () => {
         {
           post.length > 0 ? (
            post.map(src => (
-            <div>
+            <div key={src}>
               <img
                 src={src}
                 alt=''
